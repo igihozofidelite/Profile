@@ -1,3 +1,5 @@
+import { useState } from "react"
+import { sendContactMessage } from "./services/firebase.js"
 
 const skills = [
   "HTML",
@@ -242,6 +244,41 @@ function Education() {
 }
 
 function Contact() {
+  const [form, setForm] = useState({ name: "", email: "", message: "" })
+  const [status, setStatus] = useState({ type: "", message: "" })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  function handleChange(event) {
+    const { name, value } = event.target
+    setForm((currentForm) => ({ ...currentForm, [name]: value }))
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault()
+    setStatus({ type: "", message: "" })
+
+    if (Object.values(form).some((value) => !value.trim())) {
+      setStatus({ type: "error", message: "Please fill in all fields." })
+      return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      await sendContactMessage(form)
+      setForm({ name: "", email: "", message: "" })
+      setStatus({ type: "success", message: "Thanks! Your message has been sent." })
+    } catch (error) {
+      console.error("Could not send contact message:", error)
+      setStatus({
+        type: "error",
+        message: "Your message could not be sent. Please try again or email me directly.",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <section id="contact" className="bg-gray-900 py-16 px-6">
       <div className="max-w-3xl mx-auto text-center">
@@ -276,12 +313,77 @@ function Contact() {
           </p>
         </div>
 
-        <a
-          href="mailto:igihozofidelite31@gmail.com"
-          className="inline-block mt-8 bg-purple-600 hover:bg-purple-700 text-white px-7 py-3 rounded-lg transition"
-        >
-          Send Me an Email
-        </a>
+        <form onSubmit={handleSubmit} className="mt-8 space-y-4 text-left">
+          <label className="block text-gray-300">
+            Name
+            <input
+              name="name"
+              type="text"
+              value={form.name}
+              onChange={handleChange}
+              autoComplete="name"
+              maxLength={100}
+              required
+              className="mt-2 w-full rounded-lg border border-gray-700 bg-gray-950 px-4 py-3 text-white focus:border-purple-400 focus:outline-none"
+            />
+          </label>
+
+          <label className="block text-gray-300">
+            Email
+            <input
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              autoComplete="email"
+              maxLength={254}
+              required
+              className="mt-2 w-full rounded-lg border border-gray-700 bg-gray-950 px-4 py-3 text-white focus:border-purple-400 focus:outline-none"
+            />
+          </label>
+
+          <label className="block text-gray-300">
+            Message
+            <textarea
+              name="message"
+              value={form.message}
+              onChange={handleChange}
+              rows={5}
+              maxLength={3000}
+              required
+              className="mt-2 w-full resize-y rounded-lg border border-gray-700 bg-gray-950 px-4 py-3 text-white focus:border-purple-400 focus:outline-none"
+            />
+          </label>
+
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="bg-purple-600 hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-60 text-white px-7 py-3 rounded-lg transition"
+          >
+            {isSubmitting ? "Sending..." : "Send Message"}
+          </button>
+
+          {status.message && (
+            <p
+              role="status"
+              aria-live="polite"
+              className={status.type === "error" ? "text-red-400" : "text-green-400"}
+            >
+              {status.message}
+            </p>
+          )}
+        </form>
+
+        <p className="mt-4 text-gray-400">
+          Or{" "}
+          <a
+            href="mailto:igihozofidelite31@gmail.com"
+            className="text-purple-400 hover:text-white"
+          >
+            email me directly
+          </a>
+          .
+        </p>
 
         <div className="flex justify-center flex-wrap gap-6 mt-8 text-purple-400">
           {socialLinks.map((social) => (

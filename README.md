@@ -1,5 +1,15 @@
 # React + Vite
 
+## Firebase contact messages
+
+The contact form saves submissions to the Firestore `contactMessages`
+collection. In the Firebase console, enable Cloud Firestore for the configured
+project and publish the rules in `firestore.rules`. The rules allow validated
+message creation only; visitors cannot read, update, or delete submissions.
+
+Enable Firebase App Check for the web app before deploying publicly to help
+reduce automated abuse of the public contact form.
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:
